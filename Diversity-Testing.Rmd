@@ -1,0 +1,75 @@
+---
+title: "Diversity Testing"
+author: "John Sterrett"
+date: "8/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(tidyverse, qiime2R, ggplot2, magrittr, lme4, lmerTest, knitr)
+```
+
+# Set up faith vector to be loaded
+
+I think the spaces in our sample ids are messing with the qiime2R function, so I'm just going to unzip the artifact and load the tsv
+
+**(Bash)**
+```{bash, results = 'hide'} 
+ls core-diversity-results
+
+mkdir core-diversity-results/vectorsforR/
+
+cp core-diversity-results/faith_pd_vector.qza core-diversity-results/vectorsforR/faith_pd_vector.zip
+
+unzip core-diversity-results/vectorsforR/faith_pd_vector.zip 
+
+rm -r core-diversity-results/vectorsforR
+
+mv a55d4ece-ce0f-4212-8210-9b237e330309/data/alpha-diversity.tsv core-diversity-results/faith_pd_vector.tsv
+
+rm -r a55d4ece-ce0f-4212-8210-9b237e330309/
+```
+
+
+**(Back to R)**
+```{r}
+
+faith <- read_tsv("core-diversity-results/faith_pd_vector.tsv", 
+                  show_col_types = FALSE, 
+                  col_names = c("Sampleid", "faith_pd"),
+                  skip = 1) %>% 
+    data.frame()
+
+row.names(faith) <- faith$Sampleid
+
+
+metadata <- read_tsv("data/metadata.tsv", 
+                     show_col_types = FALSE) %>% 
+    data.frame()
+
+row.names(metadata) <- metadata$Sampleid
+
+metadata$faith_pd <- faith$faith_pd
+```
+
+# Visualize faith_pd
+
+Histogram looks pretty skewed, so I'm going to run the models on the rank of faith or do nonparametric tests.
+
+```{r}
+hist(metadata$faith_pd)
+
+plot(y=metadata$faith_pd, x=metadata$Timepoint)
+```
+
+
+# LME Time
+```{r}
+m <- lmer(rank(faith_pd) ~ Timepoint + (1|Subjectcode), data = metadata) 
+
+m %>% summary()
+
+```
+
