@@ -6,17 +6,20 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
 
 pacman::p_load(tidyverse, qiime2R, ggplot2, magrittr, lme4, lmerTest, knitr)
 ```
 
+```{bash, echo=FALSE, results = 'hide'} 
 # Set up faith vector to be loaded
 
-I think the spaces in our sample ids are messing with the qiime2R function, so I'm just going to unzip the artifact and load the tsv
+#I think the spaces in our sample ids are messing with the qiime2R function, so I'm just going to unzip the artifact and load the tsv
 
-**(Bash)**
-```{bash, results = 'hide'} 
+#**(Bash)**
+
 ls core-diversity-results
 
 mkdir core-diversity-results/vectorsforR/
@@ -34,7 +37,7 @@ rm -r a55d4ece-ce0f-4212-8210-9b237e330309/
 
 
 **(Back to R)**
-```{r}
+```{r, echo=FALSE}
 
 faith <- read_tsv("core-diversity-results/faith_pd_vector.tsv", 
                   show_col_types = FALSE, 
@@ -58,18 +61,86 @@ metadata$faith_pd <- faith$faith_pd
 
 Histogram looks pretty skewed, so I'm going to run the models on the rank of faith or do nonparametric tests.
 
-```{r}
+```{r, echo=FALSE}
 hist(metadata$faith_pd)
 
 plot(y=metadata$faith_pd, x=metadata$Timepoint)
 ```
 
 
-# LME Time
-```{r}
+# LME Timepoint
+```{r, echo=FALSE}
 m <- lmer(rank(faith_pd) ~ Timepoint + (1|Subjectcode), data = metadata) 
 
-m %>% summary()
+m %>% summary() %>% coef() %>% kable
+```
 
+```{r, echo=FALSE}
+p <- ggplot(data = metadata, mapping = aes(x=Timepoint,
+                                           group=Timepoint,
+                                           y=faith_pd,
+                                           fill=Education)) +
+    geom_boxplot() +
+    geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) +
+    stat_summary(fun=mean, geom="line", aes(group=1))  + 
+    stat_summary(fun=mean, geom="point", shape=2, size=2) +
+    ylim(0,80)
+
+p
+```
+
+# LME Sex
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Sex + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+# LME Length & weight
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Length*Birth.Weight + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+
+# LME Gestational age
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Gestational.Age + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+# LME BMI
+```{r, echo=FALSE}
+metadata$Mothers.BMI <- (metadata$Mothers.Weight * 0.45)/ (metadata$Mothers.Height * 0.308)^2
+
+m <- lmer(rank(faith_pd) ~ Mothers.BMI + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+
+# LME Education
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Education + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+# LME Smoking
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Smoke.during.pregnancy + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+# LME Valtrex
+```{r, echo=FALSE}
+metadata$Valtrex <- grepl("valtrex", metadata$Maternal.relevant.medical.hx)
+
+m <- lmer(rank(faith_pd) ~ Valtrex + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
 ```
 
