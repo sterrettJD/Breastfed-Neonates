@@ -36,7 +36,6 @@ rm -r a55d4ece-ce0f-4212-8210-9b237e330309/
 ```
 
 
-**(Back to R)**
 ```{r, echo=FALSE}
 
 faith <- read_tsv("core-diversity-results/faith_pd_vector.tsv", 
@@ -59,8 +58,7 @@ metadata$faith_pd <- faith$faith_pd
 
 # Visualize faith_pd
 
-Histogram looks pretty skewed, so I'm going to run the models on the rank of faith or do nonparametric tests.
-
+Histogram looks pretty skewed, so I'm going to run the models on the ranks.
 ```{r, echo=FALSE}
 hist(metadata$faith_pd)
 
@@ -128,6 +126,13 @@ m <- lmer(rank(faith_pd) ~ Education + (1|Subjectcode), data = metadata)
 m %>% summary() %>% coef() %>% kable
 ```
 
+# LME Ethnicity
+```{r, echo=FALSE}
+m <- lmer(rank(faith_pd) ~ Ethnicity.Race + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
 # LME Smoking
 ```{r, echo=FALSE}
 m <- lmer(rank(faith_pd) ~ Smoke.during.pregnancy + (1|Subjectcode), data = metadata) 
@@ -140,6 +145,15 @@ m %>% summary() %>% coef() %>% kable
 metadata$Valtrex <- grepl("valtrex", metadata$Maternal.relevant.medical.hx)
 
 m <- lmer(rank(faith_pd) ~ Valtrex + (1|Subjectcode), data = metadata) 
+
+m %>% summary() %>% coef() %>% kable
+```
+
+# LME Penicillin
+```{r, echo=FALSE}
+metadata$Penicillin <- grepl("penicillin", metadata$Maternal.relevant.medical.hx)
+
+m <- lmer(rank(faith_pd) ~ Penicillin + (1|Subjectcode), data = metadata) 
 
 m %>% summary() %>% coef() %>% kable
 ```
