@@ -158,3 +158,8 @@ m <- lmer(rank(faith_pd) ~ Penicillin + (1|Subjectcode), data = metadata)
 m %>% summary() %>% coef() %>% kable
 ```
 
+# 
+```{r}
+kruskal.test(x=metadata$faith_pd, g=metadata$Subjectcode)
+```
+
