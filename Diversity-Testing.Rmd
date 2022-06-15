@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE)
 
 pacman::p_load(tidyverse, qiime2R, ggplot2, magrittr, lme4, lmerTest, knitr)
+
+setwd("/Users/johnsterrett/Research-Projects/Boulder/Phadtare-Breastfeeding")
 ```
 
 ```{bash, echo=FALSE, results = 'hide'} 
@@ -82,9 +84,13 @@ p <- ggplot(data = metadata, mapping = aes(x=Timepoint,
     geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) +
     stat_summary(fun=mean, geom="line", aes(group=1))  + 
     stat_summary(fun=mean, geom="point", shape=2, size=2) +
-    ylim(0,80)
+    ylim(0,80) + 
+    ylab("Faith's Phylogenetic Diversity") + theme_bw()
 
 p
+
+ggsave("Figures/Faith_time.png")
+ggsave("Figures/Faith_time.pdf")
 ```
 
 # LME Sex
