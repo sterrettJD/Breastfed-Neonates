@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE,
 
 pacman::p_load(tidyverse, qiime2R, ggplot2, magrittr, lme4, lmerTest, knitr)
 
-setwd("/Users/johnsterrett/Research-Projects/Boulder/Phadtare-Breastfeeding")
+setwd("/Users/johnsterrett/Research-Projects/Lowry/Breastfed-Neonates")
 ```
 
 ```{bash, echo=FALSE, results = 'hide'} 
@@ -78,14 +78,15 @@ m %>% summary() %>% coef() %>% kable
 ```{r, echo=FALSE}
 p <- ggplot(data = metadata, mapping = aes(x=Timepoint,
                                            group=Timepoint,
-                                           y=faith_pd,
-                                           fill=Education)) +
+                                           y=faith_pd)) +
     geom_boxplot() +
     geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) +
     stat_summary(fun=mean, geom="line", aes(group=1))  + 
     stat_summary(fun=mean, geom="point", shape=2, size=2) +
     ylim(0,80) + 
-    ylab("Faith's Phylogenetic Diversity") + theme_bw()
+    ylab("Faith's Phylogenetic Diversity") + 
+    scale_x_continuous(breaks=0:2,labels=c(1,2,3)) + 
+    theme_bw()
 
 p
 
